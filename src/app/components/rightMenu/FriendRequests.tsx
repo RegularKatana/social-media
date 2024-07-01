@@ -1,6 +1,25 @@
+import prisma from "@/lib/client";
+import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
+import FriendRequestList from "./FriendRequestList";
 
-const FriendRequests = () => {
+const FriendRequests = async () => {
+
+    const {userId} = auth()
+
+    if(!userId) return null;
+
+    const requests = await prisma.followRequest.findMany({
+        where:{
+            receiverId: userId,
+        },
+        include:{
+            sender:true,
+        },
+    });
+
+    if(requests.length === 0) return null;
+
     return(
         <div className="p-4 bg-white rounded-lg shadow-md text-sm flex flex-col gap-4">
             {/* TOP */}
@@ -10,50 +29,7 @@ const FriendRequests = () => {
             </div>
             
             {/* USER */}
-            <div className="flex items-center justify-between ">
-                <div className="flex items-center gap-4">
-                    <img src="https://images.pexels.com/photos/26652842/pexels-photo-26652842/free-photo-of-a-stairway-leading-up-to-a-glass-building.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load" 
-                    alt="" 
-                    width={40} 
-                    height={40} 
-                    className="w-10 h-10 rounded-full object-cover"/>
-                    <span className="font-semibold">Wayne Burton</span>
-                </div>
-                <div className="flex gap-3 justify-end">
-                    <img src="/accept.png" alt="" width={20} height={20} className="cursor-pointer" />
-                    <img src="/reject.png" alt="" width={20} height={20} className="cursor-pointer" />
-                </div>
-            </div>
-            {/* USER */}
-            <div className="flex items-center justify-between ">
-                <div className="flex items-center gap-4">
-                    <img src="https://images.pexels.com/photos/26652842/pexels-photo-26652842/free-photo-of-a-stairway-leading-up-to-a-glass-building.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load" 
-                    alt="" 
-                    width={40} 
-                    height={40} 
-                    className="w-10 h-10 rounded-full object-cover"/>
-                    <span className="font-semibold">Wayne Burton</span>
-                </div>
-                <div className="flex gap-3 justify-end">
-                    <img src="/accept.png" alt="" width={20} height={20} className="cursor-pointer" />
-                    <img src="/reject.png" alt="" width={20} height={20} className="cursor-pointer" />
-                </div>
-            </div>
-            {/* USER */}
-            <div className="flex items-center justify-between ">
-                <div className="flex items-center gap-4">
-                    <img src="https://images.pexels.com/photos/26652842/pexels-photo-26652842/free-photo-of-a-stairway-leading-up-to-a-glass-building.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load" 
-                    alt="" 
-                    width={40} 
-                    height={40} 
-                    className="w-10 h-10 rounded-full object-cover"/>
-                    <span className="font-semibold">Wayne Burton</span>
-                </div>
-                <div className="flex gap-3 justify-end">
-                    <img src="/accept.png" alt="" width={20} height={20} className="cursor-pointer" />
-                    <img src="/reject.png" alt="" width={20} height={20} className="cursor-pointer" />
-                </div>
-            </div>
+            <FriendRequestList requests = {requests}/>
         </div>
     )
 }

@@ -2,6 +2,7 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import prisma from '@/lib/client'
+import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
 
@@ -20,9 +21,7 @@ export async function POST(req: Request) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response('Error occured -- no svix headers', {
-      status: 400
-    })
+    return NextResponse.json({ message: 'Error occurred -- no svix headers' }, { status: 400 });
   }
 
   // Get the body
@@ -43,17 +42,15 @@ export async function POST(req: Request) {
     }) as WebhookEvent
   } catch (err) {
     console.error('Error verifying webhook:', err);
-    return new Response('Error occured', {
-      status: 400
-    })
+    return NextResponse.json({ message: 'Error occurred' }, { status: 400 });
   }
 
   // Do something with the payload
   // For this guide, you simply log the payload to the console
   const { id } = evt.data;
   const eventType = evt.type;
-//   console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
-//   console.log('Webhook body:', body)
+  console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
+  console.log('Webhook body:', body)
 
 if(eventType === "user.created"){
     try{
@@ -66,11 +63,11 @@ if(eventType === "user.created"){
                 cover:"/noCover.png",
             },
         });
-        return new Response("User has been created!", {status:200})
+        return NextResponse.json({ message: "User has been created!" }, { status: 200 });
 
     }catch(err){
         console.log(err)
-        return new Response("Failed to create the user!", {status:500})
+        return NextResponse.json({ message: "Failed to create the user!" }, { status: 500 })
     }
 }
 
@@ -88,13 +85,13 @@ if(eventType === "user.updated"){
                 cover:"/noCover.png",
             },
         });
-        return new Response("User has been updated!", {status:200})
+        return NextResponse.json({ message: "User has been updated!" }, { status: 200 });
 
     }catch(err){
         console.log(err)
-        return new Response("Failed to update the user!", {status:500})
+        return NextResponse.json({ message: "Failed to update the user!" }, { status: 500 });
     }
 }
 
-  return new Response('Wbhook received', { status: 200 })
+return NextResponse.json({ message: 'Webhook received' }, { status: 200 });
 }
